@@ -103,8 +103,9 @@ async def test_agent_types(
         assert response.answer.cost > 0, "Expected nonzero cost"
 
 
+@pytest.mark.parametrize("agent_type", [ToolSelector, SimpleAgent])
 @pytest.mark.asyncio
-async def test_timeout(agent_test_settings: Settings) -> None:
+async def test_timeout(agent_test_settings: Settings, agent_type: str | type) -> None:
     agent_test_settings.prompts.pre = None
     agent_test_settings.agent.timeout = 0.001
     agent_test_settings.llm = "gpt-4o-mini"
@@ -112,7 +113,8 @@ async def test_timeout(agent_test_settings: Settings) -> None:
     response = await agent_query(
         QueryRequest(
             query="Are COVID-19 vaccines effective?", settings=agent_test_settings
-        )
+        ),
+        agent_type=agent_type,
     )
     # ensure that GenerateAnswerTool was called
     assert response.status == AgentStatus.TIMEOUT, "Agent did not timeout"
